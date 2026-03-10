@@ -34,7 +34,7 @@ func main() {
 			os.Exit(0)
 
 		case "echo":
-			fmt.Println(argv[1])
+			fmt.Println(strings.Join(argv[1:], " "))
 
 		case "type":
 			//Checks the command type
