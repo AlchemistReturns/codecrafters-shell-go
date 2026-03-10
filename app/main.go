@@ -61,6 +61,14 @@ func main() {
 			}
 			fmt.Println(pwd)
 
+		case "cd":
+			//Changes the current working directory
+
+			err := os.Chdir(argv[1])
+			if err != nil {
+				fmt.Printf("cd: %s: No such file or directory", argv[1])
+			}
+
 		default:
 			//Checks the first argument to see if it is an executable
 			//If it is an executable, calls the execute command with the provided arguments
