@@ -55,7 +55,7 @@ func main() {
 				if err != nil {
 					fmt.Printf("%s: %s\n", command, err)
 				} else {
-					fmt.Printf("%s\n", output)
+					fmt.Printf("%s", output)
 				}
 			}
 
