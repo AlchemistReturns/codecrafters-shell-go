@@ -11,6 +11,9 @@ import (
 )
 
 func main() {
+	//array to maintain builtin types
+	builtinTypes := []string{"type", "echo", "exit"}
+
 	//REPL
 	for {
 		fmt.Print("$ ")
@@ -22,54 +25,51 @@ func main() {
 		}
 		command = strings.TrimSpace(command)
 
-		//array to maintain builtin types
-		builtinTypes := []string{"type", "echo", "exit"}
+		//Split the command
+		argv := strings.Split(command, " ")
 
-		if command == "exit" {
-			break
+		//Perform according to the input command
+		switch argv[0] {
+		case "exit":
+			os.Exit(0)
 
-		} else if strings.HasPrefix(command, "echo ") {
-			//echoes a command
-			command = strings.TrimPrefix(command, "echo ")
-			fmt.Println(command)
+		case "echo":
+			fmt.Println(argv[1])
 
-		} else if strings.HasPrefix(command, "type ") {
+		case "type":
 			//Checks the command type
 			//If is a builtin, displays that it is a builtin command
 			//Else shows the absolute file path
-			command = strings.TrimPrefix(command, "type ")
 
-			if slices.Contains(builtinTypes, command) {
-				fmt.Printf("%s is a shell builtin\n", command)
+			if slices.Contains(builtinTypes, argv[1]) {
+				fmt.Printf("%s is a shell builtin\n", argv[1])
 			} else {
-				path, err := exec.LookPath(command)
+				path, err := exec.LookPath(argv[1])
 				if err != nil {
-					fmt.Printf("%s: not found\n", command)
+					fmt.Printf("%s: not found\n", argv[1])
 				} else {
-					fmt.Printf("%s is %s\n", command, path)
+					fmt.Printf("%s is %s\n", argv[1], path)
 				}
 			}
 
-		} else {
-			//splits the command line arguments into an argv slice
-			//checks the first argument to see if it is an executable
+		default:
+			//Checks the first argument to see if it is an executable
 			//If it is an executable, calls the execute command with the provided arguments
 			//Displays the output of executing the executable
-			argv := strings.Split(command, " ")
+
 			_, err := exec.LookPath(argv[0])
 
 			if err != nil {
-				fmt.Printf("%s: command not found\n", command)
+				fmt.Printf("%s: command not found\n", argv[0])
 			} else {
 				cmd := exec.Command(argv[0], argv[1:]...)
 				output, err := cmd.CombinedOutput()
 				if err != nil {
-					fmt.Printf("%s: %s\n", command, err)
+					fmt.Printf("%s: %s\n", argv[0], err)
 				} else {
 					fmt.Printf("%s", output)
 				}
 			}
-
 		}
 	}
 }
