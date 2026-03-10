@@ -54,7 +54,12 @@ func main() {
 
 		case "pwd":
 			//prints the current working directory
-			fmt.Println(os.Getwd())
+
+			pwd, err := os.Getwd()
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println(pwd)
 
 		default:
 			//Checks the first argument to see if it is an executable
