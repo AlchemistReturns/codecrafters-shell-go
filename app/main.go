@@ -12,7 +12,7 @@ import (
 
 func main() {
 	//array to maintain builtin types
-	builtinTypes := []string{"type", "echo", "exit"}
+	builtinTypes := []string{"type", "echo", "exit", "pwd"}
 
 	//REPL
 	for {
@@ -51,6 +51,10 @@ func main() {
 					fmt.Printf("%s is %s\n", argv[1], path)
 				}
 			}
+
+		case "pwd":
+			//prints the current working directory
+			fmt.Println(os.Getwd())
 
 		default:
 			//Checks the first argument to see if it is an executable
