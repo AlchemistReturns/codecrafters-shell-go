@@ -24,11 +24,14 @@ func main() {
 
 		if command == "exit" {
 			break
+
 		} else if strings.HasPrefix(command, "echo ") {
 			command = strings.TrimPrefix(command, "echo ")
 			fmt.Println(command)
+
 		} else if strings.HasPrefix(command, "type ") {
 			command = strings.TrimPrefix(command, "type ")
+
 			if slices.Contains(builtinTypes, command) {
 				fmt.Printf("%s is a shell builtin\n", command)
 			} else {
@@ -39,8 +42,22 @@ func main() {
 					fmt.Printf("%s is %s\n", command, path)
 				}
 			}
+
 		} else {
-			fmt.Printf("%s: command not found\n", command)
+			argv := strings.Split(command, " ")
+			_, err := exec.LookPath(argv[0])
+
+			if err != nil {
+				fmt.Printf("%s: command not found\n", command)
+			} else {
+				cmd := exec.Command(argv[0], argv[1:]...)
+				output, err := cmd.CombinedOutput()
+				if err != nil {
+					fmt.Printf("%s: %s\n", command, err)
+				} else {
+					fmt.Printf("%s\n", output)
+				}
+			}
 
 		}
 	}
