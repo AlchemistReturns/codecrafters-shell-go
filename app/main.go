@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"slices"
 	"strings"
 )
@@ -19,7 +20,7 @@ func main() {
 		}
 		command = strings.TrimSpace(command)
 
-		builtin_types := []string{"type", "echo", "exit"}
+		builtinTypes := []string{"type", "echo", "exit"}
 
 		if command == "exit" {
 			break
@@ -28,13 +29,19 @@ func main() {
 			fmt.Println(command)
 		} else if strings.HasPrefix(command, "type ") {
 			command = strings.TrimPrefix(command, "type ")
-			if slices.Contains(builtin_types, command) {
+			if slices.Contains(builtinTypes, command) {
 				fmt.Printf("%s is a shell builtin\n", command)
 			} else {
-				fmt.Printf("%s: not found\n", command)
+				path, err := exec.LookPath(command)
+				if err != nil {
+					fmt.Printf("%s: not found\n", command)
+				} else {
+					fmt.Printf("%s is %s\n", command, path)
+				}
 			}
 		} else {
 			fmt.Printf("%s: command not found\n", command)
+
 		}
 	}
 }
