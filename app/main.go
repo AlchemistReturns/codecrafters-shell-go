@@ -20,6 +20,9 @@ func main() {
 			log.Fatal(err)
 		}
 		command = strings.TrimSpace(command)
+		if command == "exit" {
+			break
+		}
 		fmt.Printf("%s: command not found\n", command)
 	}
 
