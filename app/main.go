@@ -12,24 +12,25 @@ import (
 )
 
 func handleInput(input string) []string {
-	// This regex matches either:
-	// 1. A quoted string: '((?:''|[^'])*)'
-	// 2. A sequence of non-space, non-quote characters: ([^'\s]+)
-	re := regexp.MustCompile(`'((?:''|[^'])*)'|([^'\s]+)`)
+	// This regex matches an "argument" which is a sequence of:
+	// Either a quoted block '...' OR one or more non-space characters [^\s]
+	// The (?:...) logic ensures they are treated as one continuous token.
+	re := regexp.MustCompile(`(?:'((?:''|[^'])*)'|[^\s'])+`)
 
-	matches := re.FindAllStringSubmatch(input, -1)
+	matches := re.FindAllString(input, -1)
 	var result []string
 
-	for _, m := range matches {
-		if m[1] != "" || strings.Contains(m[0], "''") || m[0] == "''" {
-			// It's a quoted match (Group 1)
-			// Dissolve '' into a single ' (or empty string "" per your preference)
-			dissolved := strings.ReplaceAll(m[1], "''", "")
-			result = append(result, dissolved)
-		} else if m[2] != "" {
-			// It's a plain word (Group 2)
-			result = append(result, m[2])
-		}
+	for _, match := range matches {
+		// For each full match (e.g., script''hello), we manually
+		// strip the outer quotes of any quoted sections and dissolve ''
+
+		// 1. Handle inner doubled quotes first: '' -> (empty)
+		temp := strings.ReplaceAll(match, "''", "")
+
+		// 2. Strip any remaining single quotes
+		temp = strings.ReplaceAll(temp, "'", "")
+
+		result = append(result, temp)
 	}
 
 	return result
