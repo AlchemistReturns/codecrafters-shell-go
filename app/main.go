@@ -11,28 +11,37 @@ import (
 	"strings"
 )
 
+// The following function was generated with the help of AI (Gemini)
 func handleInput(input string) []string {
-	// This regex defines a single "argument" as one or more of:
-	// 1. '((?:''|[^'])*)'  : Single quotes (with internal '' dissolved later)
-	// 2. "((?:""|[^"])*)"  : Double quotes (with internal "" dissolved later)
-	// 3. [^\s'"]+          : Any character that isn't a space or a quote
-	re := regexp.MustCompile(`(?:'((?:''|[^'])*)'|"((?:""|[^"])*)"|[^\s'"]+)+`)
+	// This regex matches an "argument" (one or more parts glued together).
+	// Part 1: '((?:''|[^'])*)'  (Single quoted)
+	// Part 2: "((?:""|[^"])*)"  (Double quoted)
+	// Part 3: [^\s'"]+          (Plain text)
+	reArg := regexp.MustCompile(`(?:'((?:''|[^'])*)'|"((?:""|[^"])*)"|[^\s'"]+)+`)
 
-	matches := re.FindAllString(input, -1)
+	// This sub-regex is used to find the quoted parts WITHIN a single argument
+	reParts := regexp.MustCompile(`'((?:''|[^'])*)'|"((?:""|[^"])*)"`)
+
+	matches := reArg.FindAllString(input, -1)
 	var result []string
 
 	for _, match := range matches {
-		// Step 1: Dissolve the internal doubled-up quotes first
-		// This ensures '' and "" inside a block are handled.
-		processed := strings.ReplaceAll(match, "''", "")
-		processed = strings.ReplaceAll(processed, `""`, "")
+		// We process the match by looking ONLY for the quoted segments
+		// and replacing them with their stripped/dissolved content.
+		processed := reParts.ReplaceAllStringFunc(match, func(m string) string {
+			if strings.HasPrefix(m, "'") {
+				// It's a single-quoted block: strip outer ' and dissolve ''
+				content := m[1 : len(m)-1]
+				return strings.ReplaceAll(content, "''", "")
+			} else {
+				// It's a double-quoted block: strip outer " and dissolve ""
+				content := m[1 : len(m)-1]
+				return strings.ReplaceAll(content, `""`, "")
+			}
+		})
 
-		// Step 2: Remove the structural outer quotes
-		// We use ReplaceAll with a simple string because at this point
-		// the remaining ' and " are just the boundaries.
-		processed = strings.ReplaceAll(processed, "'", "")
-		processed = strings.ReplaceAll(processed, "\"", "")
-
+		// Note: Plain text like script's is left untouched by ReplaceAllStringFunc
+		// because it doesn't match the reParts pattern.
 		result = append(result, processed)
 	}
 
